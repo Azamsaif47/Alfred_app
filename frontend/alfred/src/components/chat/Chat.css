@@ -1,0 +1,94 @@
+/* For Chrome, Safari, and Edge */
+.scrollable {
+    max-height: calc(100vh - 110px); /* Adjust as needed */
+    overflow-y: auto;
+    margin-right: -10px; /* Adjust the padding to position scrollbar */
+    position: relative; /* For absolute positioning of pseudo-elements */
+}
+
+/* Scrollbar styles */
+.scrollable::-webkit-scrollbar {
+    width: 6px; /* Decrease width for a slimmer scrollbar */
+}
+
+.scrollable::-webkit-scrollbar-track {
+    background: transparent; /* Make the track transparent */
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3); /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+/* On hover, change the thumb color */
+.scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5); /* Darker on hover */
+}
+
+/* For Firefox */
+.scrollable {
+    scrollbar-width: thin; /* Set the width of the scrollbar */
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent; /* Thumb and track colors */
+}
+
+/* Pseudo-elements to hide ends of the scrollbar */
+.scrollable::before,
+.scrollable::after {
+    content: '';
+    position: absolute;
+    width: 6px; /* Same as scrollbar width */
+    background: inherit; /* Match the scrollbar track color */
+}
+
+.scrollable::before {
+    top: 0; /* Position at the top */
+    height: 10px; /* Height of the cut-off at the top */
+    left: 0; /* Align with left */
+    border-top-left-radius: 10px; /* Round top corners */
+    border-top-right-radius: 10px; /* Round top corners */
+}
+
+.scrollable::after {
+    bottom: 0; /* Position at the bottom */
+    height: 10px; /* Height of the cut-off at the bottom */
+    left: 0; /* Align with left */
+    border-bottom-left-radius: 10px; /* Round bottom corners */
+    border-bottom-right-radius: 10px; /* Round bottom corners */
+}
+
+.loading-dots {
+    display: flex; /* Changed to flex for alignment */
+    justify-content: center; /* Center the dots horizontally */
+    align-items: center; /* Center the dots vertically */
+    height: 100px; /* Set a fixed height for alignment */
+}
+
+.loading-dots div {
+    position: relative;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #1890ff;
+    animation: loading-dots 1.5s infinite ease-in-out;
+    margin: 0 4px; /* Added margin for spacing between dots */
+}
+
+.loading-dots div:nth-child(1) {
+    animation-delay: -0.3s;
+}
+
+.loading-dots div:nth-child(2) {
+    animation-delay: -0.15s;
+}
+
+@keyframes loading-dots {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
