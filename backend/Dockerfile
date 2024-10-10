@@ -1,20 +1,20 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11-slim
-
-# Install PostgreSQL dependencies (if you're using psycopg2)
-RUN apt-get update && apt-get install -y libpq-dev gcc
+FROM python:3.10-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the image
-COPY requirements.txt .
+# Copy the requirements file into the container
+COPY backend/requirements.txt .
 
-# Install dependencies from requirements.txt
+# Install any dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-RUN ls -la /app  # or wherever the files were copied
+# Copy the rest of the FastAPI application code into the container
+COPY backend/ .
 
-# Expose FastAPI default port
+# Expose the port FastAPI will run on
 EXPOSE 8000
+
+# Run the FastAPI app with uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
