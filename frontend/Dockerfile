@@ -1,26 +1,31 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS build
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json
+# Copy the package.json and lock file to install dependencies
 COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the frontend code into the container
+# Copy the rest of the frontend code
 COPY frontend/ .
 
-# Build the React app
+# Build the app using environment variables
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
-# Install 'serve' to run the production build
-RUN npm install -g serve
+# Production stage with Nginx
+FROM nginx:alpine
 
-# Expose the port for the React app
-EXPOSE 3000
+# Copy the built React files from the build stage
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Serve the app
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Expose port 80
+EXPOSE 80
+
+# Run Nginx
+CMD ["nginx", "-g", "daemon off;"]
