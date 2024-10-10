@@ -1,20 +1,27 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ChatItem from "../chat_item/ChatItem.jsx";
 import { Button } from "antd";
 import { MessageOutlined, LoadingOutlined } from '@ant-design/icons';
+import {useNavigate} from "react-router-dom";
+import "./Sidebar.css"
+
 
 const Sidebar = ({ onSelectThread }) => {
     const [threads, setThreads] = useState([]);
+    const baseURL = import.meta.env.VITE_API_URL;
+    console.log(baseURL)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedMenu, setSelectedMenu] = useState(null);
     const [selectedThreadId, setSelectedThreadId] = useState(null);
+    const navigate = useNavigate();
 
 
     const handleSelectThread = (threadId, threadName) => {
-        setSelectedThreadId(threadId); // Set the selected thread's ID
-        onSelectThread(threadId, threadName); // Call the original onSelectThread
+        setSelectedThreadId(threadId);
+        onSelectThread(threadId, threadName);
+        navigate(`/thread/${threadId}`);
     };
 
 
@@ -27,25 +34,26 @@ const Sidebar = ({ onSelectThread }) => {
                 isSelected={selectedThreadId === thread.thread_id}
                 selectedMenu={selectedMenu}
                 setSelectedMenu={setSelectedMenu}
-                setThreads={setThreads} // Pass setThreads to ChatItem
+                setThreads={setThreads}
             />
         ));
     };
-
     useEffect(() => {
         const fetchThreads = async () => {
             try {
-                const response = await axios.get("http://127.0.0.1:9000/threads/");
-                if (response.data) {
-                    setThreads(response.data.reverse());
+                const response = await axios.get(`${baseURL}/threads/`);
+                console.log("Response data:", response.data); // Log the response
+
+                // Check if response.data is an array and set it to state
+                if (Array.isArray(response.data)) {
+                    setThreads(response.data.reverse()); // Reverse the array before setting
                 } else {
-                    console.error("No threads found.");
+                    console.error("Expected an array but received:", response.data);
                 }
             } catch (error) {
                 console.error("Error fetching threads:", error);
             }
         };
-
         fetchThreads();
     }, []);
 
@@ -53,14 +61,15 @@ const Sidebar = ({ onSelectThread }) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.post("http://127.0.0.1:9000/create_thread/");
+            const response = await axios.post(`${baseURL}/create_thread/`);
             setThreads((prevThreads) => [
-                { thread_id: response.data.thread_id, name: response.data.name },
+                {thread_id: response.data.thread_id, name: response.data.name},
                 ...prevThreads,
             ]);
             console.log("New thread created:", response.data);
 
             onSelectThread(response.data.thread_id, response.data.name);
+            navigate(`/thread/${response.data.thread_id}`);
         } catch (err) {
             setError("Error creating chat. Please try again.");
             console.error("Error creating chat:", err);
@@ -85,8 +94,8 @@ const Sidebar = ({ onSelectThread }) => {
                     <h2 className="px-5 text-lg font-medium text-slate-800 dark:text-slate-200">
                         Alfred
                         <span className="mx-2 rounded-full bg-blue-600 px-2 py-1 text-xs text-slate-200">
-                    {threads.length}
-                </span>
+                        {threads.length}
+                    </span>
                     </h2>
                 </div>
 
@@ -94,9 +103,9 @@ const Sidebar = ({ onSelectThread }) => {
                     <Button
                         onClick={handleStartChat}
                         className="flex w-full rounded-lg mb-2"
-                        type="primary" // Add primary style
-                        icon={loading ? <LoadingOutlined /> : <MessageOutlined />} // Use an icon
-                        loading={loading} // Show loading state
+                        type="primary"
+                        icon={loading ? <LoadingOutlined/> : <MessageOutlined/>}
+                        loading={loading}
                     >
                         {loading ? "Creating..." : "New Chat"}
                     </Button>
@@ -104,15 +113,13 @@ const Sidebar = ({ onSelectThread }) => {
                 </div>
 
                 <div
-                    className="flex-1 space-y-4 overflow-y-auto border-b border-slate-300 px-2 py-4 dark:border-slate-700">
+                    className="flex-1 space-y-4 custom-scroll overflow-y-auto border-b border-slate-300 px-2 py-4 dark:border-slate-700">
                     {renderPreviousChats(threads)}
                 </div>
 
-                {/* Added User and Settings buttons below chats */}
                 <div className="w-full space-y-4 px-2 py-4">
                     <button
-                        className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-200 focus:outline-none dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
+                        className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-200 focus:outline-none dark:text-slate-200 dark:hover:bg-slate-800">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
@@ -131,8 +138,7 @@ const Sidebar = ({ onSelectThread }) => {
                         User
                     </button>
                     <button
-                        className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-200 focus:outline-none dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
+                        className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-200 focus:outline-none dark:text-slate-200 dark:hover:bg-slate-800">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
@@ -156,7 +162,5 @@ const Sidebar = ({ onSelectThread }) => {
         </aside>
     );
 };
-
-
 
 export default Sidebar;

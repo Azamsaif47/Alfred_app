@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: .
+    container_name: fastapi-container
+    ports:
+      - "${PORT}:${PORT}"  # Use the PORT variable from .env
+    env_file:
+      - .env
+    volumes:
+      - ./:/app  # Mount the root directory to /app in the container
+      - ./Vector_store:/app/Vector_store
+    command: uvicorn main:app --host ${HOST} --port ${PORT}  # Use HOST and PORT from .env

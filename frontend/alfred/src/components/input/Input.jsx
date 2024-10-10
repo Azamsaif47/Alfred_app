@@ -3,27 +3,26 @@ import React, { useState } from "react";
 const Input = ({ onSendMessage, threadId, threadName }) => {
     const [inputValue, setInputValue] = useState("");
 
-    // Handle the form submission
     const handleSubmit = (e) => {
         e.preventDefault();
         if (inputValue.trim() && threadId && threadName) {
-            onSendMessage(inputValue, threadId, threadName); // Pass the inputValue along with threadId and threadName
-            setInputValue(""); // Clear the input after sending
+            onSendMessage(inputValue, threadId, threadName);
+            setInputValue("");
         } else {
             console.error("Thread ID or Thread Name is missing");
         }
     };
 
-    // Handle key down events
+
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             if (e.shiftKey) {
-                // Allow new line
+
                 return;
             }
-            // Prevent the default action (which would add a new line)
+
             e.preventDefault();
-            handleSubmit(e); // Call submit function
+            handleSubmit(e);
         }
     };
 
@@ -38,9 +37,9 @@ const Input = ({ onSendMessage, threadId, threadName }) => {
                     className="block w-full resize-none rounded-xl border-none bg-slate-200 p-4 pr-16 text-sm text-slate-900 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 sm:text-base"
                     placeholder="Enter your prompt"
                     rows="1"
-                    value={inputValue} // Controlled input
-                    onChange={(e) => setInputValue(e.target.value)} // Update state
-                    onKeyDown={handleKeyDown} // Add the key down event handler
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     required
                 ></textarea>
                 <button

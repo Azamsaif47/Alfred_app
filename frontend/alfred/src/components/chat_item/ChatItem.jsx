@@ -4,6 +4,7 @@ import {message} from "antd";
 
 const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setThreads, isSelected }) => {
     const menuRef = useRef(null);
+    const baseURL = import.meta.env.VITE_API_URL;
     const [newThreadName, setNewThreadName] = useState(thread.name);
     const [isEditing, setIsEditing] = useState(false);
     const inputRef = useRef(null);
@@ -20,27 +21,33 @@ const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setTh
             }
         }
     };
+    useEffect(() => {
+
+        const savedThreadId = localStorage.getItem('selectedThreadId');
+        if (savedThreadId === thread.thread_id) {
+            setSelectedMenu(thread.thread_id);
+        }
+    }, [thread.thread_id]);
+
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete("http://127.0.0.1:9000/delete_thread/", {
+            const response = await axios.delete(`${baseURL}/delete_thread/`, {
                 data: {
                     thread_id: thread.thread_id,
                     name: thread.name,
                 },
             });
-            console.log("Delete response:", response); // Check response
             setThreads((prevThreads) => prevThreads.filter((t) => t.thread_id !== thread.thread_id));
             message.success('Thread deleted successfully.');
         } catch (err) {
-            console.error("Error deleting chat:", err);
             message.error('Error deleting thread.');
         }
     };
 
     const handleUpdateThreadName = async () => {
         try {
-            await axios.put("http://127.0.0.1:9000/update_thread_name/", {
+            await axios.put(`${baseURL}/update_thread_name/`, {
                 thread_id: thread.thread_id,
                 new_name: newThreadName,
             });
@@ -53,7 +60,6 @@ const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setTh
             setIsEditing(false);
         } catch (err) {
             message.error('Error updating thread name.');
-            console.error("Error updating thread name:", err);
         }
     };
 
@@ -84,7 +90,8 @@ const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setTh
 
     return (
         <div
-            className={`relative rounded-lg border border-slate-300 p-0.5 dark:border-slate-700 cursor-pointer flex justify-between items-center ${isSelected ? 'bg-[#E2E8F0] text-black' : 'text-black'}`} onClick={() => onSelectThread(thread.thread_id, thread.name)}>
+            className={`relative rounded-lg border border-slate-300 p-0.5 dark:border-slate-700 cursor-pointer flex justify-between items-center ${isSelected ? 'bg-[#E2E8F0] text-black' : 'text-black'}`} onClick={() => onSelectThread(thread.thread_id, thread.name)}
+        >
             <div
                 className="flex p-1 rounded-lg transition-colors duration-200"
             >

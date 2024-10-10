@@ -1,0 +1,55 @@
+# Ignore the Git directory
+.git/
+
+# Ignore IDE settings
+.idea/
+
+# Ignore environment variable files
+.env
+
+# Ignore __pycache__ directories
+__pycache__/
+
+# Ignore virtual environment directories
+venv/
+
+# Node.js dependencies
+node_modules/
+
+# Build output
+dist/
+.vite/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env.local
+.env.*.local
+
+# IDE and editor settings
+.vscode/
+
+# MacOS specific files
+.DS_Store
+
+# Operating system files
+Thumbs.db
+ehthumbs.db
+
+# Coverage directory for testing
+coverage/
+
+# Jest test coverage
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
+
+# Other
+package-lock.json
+yarn.lock
+

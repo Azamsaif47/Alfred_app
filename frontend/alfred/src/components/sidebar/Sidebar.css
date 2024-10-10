@@ -1,0 +1,57 @@
+/* For Chrome, Safari, and Edge */
+.custom-scroll {
+    max-height: calc(100vh - 110px); /* Adjust as needed */
+    overflow-y: auto; /* Adjust the padding to position scrollbar */
+    position: relative;
+    width: 250px; /* For absolute positioning of pseudo-elements */
+}
+
+/* Scrollbar styles */
+.custom-scroll::-webkit-scrollbar {
+    width: 3px; /* Decrease width for a slimmer scrollbar */
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: transparent; /* Make the track transparent */
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3); /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+/* On hover, change the thumb color */
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5); /* Darker on hover */
+}
+
+/* For Firefox */
+.custom-scroll {
+    scrollbar-width: thin; /* Set the width of the scrollbar */
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent; /* Thumb and track colors */
+}
+
+/* Pseudo-elements to hide ends of the scrollbar */
+.custom-scroll::before,
+.custom-scroll::after {
+    content: '';
+    position: absolute;
+    width: 6px; /* Same as scrollbar width */
+    background: inherit; /* Match the scrollbar track color */
+}
+
+.custom-scroll::before {
+    top: 0; /* Position at the top */
+    height: 10px; /* Height of the cut-off at the top */
+    left: 0; /* Align with left */
+    border-top-left-radius: 10px; /* Round top corners */
+    border-top-right-radius: 10px; /* Round top corners */
+}
+
+.custom-scroll::after {
+    bottom: 0; /* Position at the bottom */
+    height: 10px; /* Height of the cut-off at the bottom */
+    left: 0; /* Align with left */
+    border-bottom-left-radius: 10px; /* Round bottom corners */
+    border-bottom-right-radius: 10px; /* Round bottom corners */
+}
