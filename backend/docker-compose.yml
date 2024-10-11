@@ -11,4 +11,4 @@ services:
     volumes:
       - ./:/app  # Mount the root directory to /app in the container
       - ./Vector_store:/app/Vector_store
-    command: uvicorn main:app --host ${HOST} --port ${PORT}  # Use HOST and PORT from .env
+    command: bash -c alembic upgrade head && uvicorn main:app --host ${HOST} --port ${PORT}  # Use HOST and PORT from .env

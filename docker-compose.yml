@@ -1,11 +1,11 @@
 services:
   db:
-    image: postgres:14
+    image: postgres:16
     container_name: postgres_db
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: alfred
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -17,9 +17,9 @@ services:
       dockerfile: backend/Dockerfile
     container_name: fastapi_backend
     environment:
-      DATABASE_URL: postgresql+asyncpg://myuser:mypassword@db:5432/mydb
-      STORE_DATABASE_URL: postgresql://myuser:mypassword@db:5432/mydb
-      OPENAI_API_KEY: sk-proj-R9wyNrcI90lJDpXWx37uT3BlbkFJTXbYarJRiFJ5zkYNzV4h
+      DATABASE_URL: postgresql+asyncpg://postgres:admin@localhost:5432/alfred
+      STORE_DATABASE_URL: postgresql://postgres:admin@localhost:5432/alfred
+      OPENAI_API_KEY: sk-proj-zgXqKiXJ3flv7xFoBvdjT3BlbkFJ1hezS1kRuOsw0jTkBEjE
     volumes:
       - ./backend:/app
     ports:
