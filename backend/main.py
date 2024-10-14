@@ -130,34 +130,26 @@ async def process_ai_messages(messages, thread_id):
         print(f"No messages found for thread_id: {thread_id}")
         return
 
+    # Classify messages into respective lists
+    human_messages = [msg for msg in messages if type(msg).__name__ == "HumanMessage"]
+    tool_messages = [msg for msg in messages if type(msg).__name__ == "ToolMessage"]
+    ai_messages = [msg for msg in messages if type(msg).__name__ == "AIMessage"]
 
-    human_messages = []
-    tool_messages = []
-    ai_messages = []
+    # Default: Take the last two messages (1 Human + 1 AI)
+    if not tool_messages:
+        last_human_message = human_messages[-1] if human_messages else None
+        last_ai_message = ai_messages[-1] if ai_messages else None
+        messages_to_process = [msg for msg in [last_human_message, last_ai_message] if msg]
 
+    # If tool messages exist, take the last 3 (1 Human + 1 Tool + 1 AI)
+    else:
+        last_human_message = human_messages[-1] if human_messages else None
+        last_tool_message = tool_messages[-1] if tool_messages else None
+        last_ai_message = ai_messages[-1] if ai_messages else None
+        messages_to_process = [msg for msg in [last_human_message, last_tool_message, last_ai_message] if msg]
 
-    for message in messages:
-        message_type = type(message).__name__.replace("Message", "")
-
-        if message_type == "Human":
-            human_messages.append(message)
-        elif message_type == "Tool":
-            tool_messages.append(message)
-        elif message_type == "AI":
-            ai_messages.append(message)
-
-
-    last_human_messages = human_messages[-3:]
-    last_tool_messages = tool_messages[-3:]
-    last_ai_messages = ai_messages[-3:]
-
-
-    last_three_messages = last_human_messages + last_tool_messages + last_ai_messages
-
-    print(f"Processing the last messages for thread_id {thread_id}: {last_three_messages}")
-
-
-    for message in last_three_messages:
+    # Process and save the selected messages
+    for message in messages_to_process:
         print(f"Saving message: {message.content}")
         await save_message_to_db(MessageCreate(
             thread_id=thread_id,
@@ -165,6 +157,9 @@ async def process_ai_messages(messages, thread_id):
             message_content=message.content,
             response_metadata=message.response_metadata
         ))
+
+    print(f"Processed messages for thread_id {thread_id}: {[msg.content for msg in messages_to_process]}")
+
 
 
 

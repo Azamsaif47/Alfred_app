@@ -16,7 +16,7 @@ CONTACTS_URL = os.getenv('CONTACTS_URL')
 CHART_URL = os.getenv('CHART_URL')
 
 vectorstore = FAISS.load_local(
-    folder_path="Vector_store/new_alfred/",
+    folder_path="Vector_store/new_alfred",
     embeddings=OpenAIEmbeddings(),
     index_name="faiss.index",
     allow_dangerous_deserialization=True

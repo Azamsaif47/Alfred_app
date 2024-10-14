@@ -10,6 +10,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - alfred_app_default
 
   backend:
     build: 
@@ -17,7 +19,7 @@ services:
       dockerfile: backend/Dockerfile
     container_name: fastapi_backend
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:admin@localhost:5432/alfred
+      DATABASE_URL: postgresql+asyncpg://postgres:admin@postgres_db:5432/alfred
       STORE_DATABASE_URL: postgresql://postgres:admin@localhost:5432/alfred
       OPENAI_API_KEY: sk-proj-zgXqKiXJ3flv7xFoBvdjT3BlbkFJ1hezS1kRuOsw0jTkBEjE
     volumes:
@@ -26,6 +28,10 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    command: >
+      bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    networks:
+      - alfred_app_default
 
   frontend:
     build:
@@ -40,5 +46,10 @@ services:
     depends_on:
       - backend
 
+
 volumes:
   postgres_data:
+
+networks:
+  alfred_app_default:  # Define the network here
+    driver: bridge
