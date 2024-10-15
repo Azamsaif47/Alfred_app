@@ -1,0 +1,46 @@
+/* ChatBox.css */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  background-color: #f0f2f5; /* Optional: Add a background color */
+}
+
+.card {
+  width: 800px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align avatar and title to the left */
+  background-color: #e2e8f0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 10px;
+  margin: 0;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.footer {
+  margin-top: 20px;
+  padding: 20px; /* Added padding to prevent button from sticking to bottom */
+  display: flex;
+  justify-content: flex-start; /* Align button to the left side */
+}

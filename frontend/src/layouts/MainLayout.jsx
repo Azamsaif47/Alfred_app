@@ -5,34 +5,32 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import Input from "../components/input/Input.jsx";
 import Chat from "../components/chat/Chat.jsx";
+import NewChat from "../components/new_chat/NewChat.jsx";
+import {useNavigate} from "react-router-dom";
 
 const { Sider, Content, Footer } = Layout;
 
 const MainLayout = () => {
     const [selectedThread, setSelectedThread] = useState({ id: null, name: null });
-    const [messages, setMessages] = useState([
-        { id: uuidv4(), role: "AI", message_content: "Welcome! How can I assist you today?", avatar: "https://example.com/ai-avatar.png" },
-    ]);
+    const [messages, setMessages] = useState([]); // No initial AI message
     const [loading, setLoading] = useState(false);
     const [source, setSource] = useState([]);
     const baseURL = import.meta.env.VITE_API_URL;
     const [threads, setThreads] = useState([]);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate()
 
     useEffect(() => {
         console.log("Updated source:", source);
     }, [source]);
 
     useEffect(() => {
-        // Fetch threads and set the first one as default
+        // Fetch threads without auto-selecting the first one
         const fetchThreads = async () => {
             try {
                 const response = await axios.get(`${baseURL}/threads/`);
                 const threadData = response.data;
                 setThreads(threadData);
-
-                if (threadData.length > 0) {
-                    setSelectedThread({ id: threadData[0].thread_id, name: threadData[0].name });
-                }
             } catch (error) {
                 console.error("Error fetching threads:", error);
             }
@@ -43,7 +41,7 @@ const MainLayout = () => {
 
     const handleSelectThread = (threadId, threadName) => {
         setSelectedThread({ id: threadId, name: threadName });
-        setMessages([]);
+        setMessages([]); // Reset messages when a new thread is selected
     };
 
     const handleSendMessage = async (message, threadId, threadName) => {
@@ -77,7 +75,7 @@ const MainLayout = () => {
             };
             setMessages((prevMessages) => [...prevMessages, aiMessage]);
             setSource(aiSource);
-            console.log(setSource)
+            console.log(setSource);
         } catch (error) {
             console.error("Error sending message:", error);
 
@@ -93,31 +91,63 @@ const MainLayout = () => {
             setLoading(false);
         }
     };
+    useEffect(() => {
+    if (selectedThread.id) {
+        console.log("Selected thread ID:", selectedThread.id);
+    }
+}, [selectedThread]);
+
+    const handleStartChat = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await axios.post(`${baseURL}/create_thread/`);
+            setThreads((prevThreads) => [
+                {thread_id: response.data.thread_id, name: response.data.name},
+                ...prevThreads,
+            ]);
+            console.log("New thread created:", response.data);
+
+            handleSelectThread(response.data.thread_id, response.data.name);
+            navigate(`/thread/${response.data.thread_id}`);
+        } catch (err) {
+            setError("Error creating chat. Please try again.");
+            console.error("Error creating chat:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
 
     return (
         <Layout style={{ height: "100vh" }}>
             <Sider width={250} style={{ background: "#E2E8F0" }}>
-                <Sidebar onSelectThread={handleSelectThread} threads={threads} />
+                <Sidebar onSelectThread={handleSelectThread} threads={threads}  onStartChart={handleStartChat}/>
             </Sider>
             <Layout>
                 <Content style={{ padding: '10px 10px', display: "flex", flexDirection: "column", backgroundColor: "#F8FAFC", flexGrow: 1 }}>
-                    {selectedThread ? (
+                    {selectedThread && selectedThread.id ? (
                         <Chat
                             selectedThread={selectedThread}
                             messages={messages}
                             setMessages={setMessages}
                         />
                     ) : (
-                        <div>Select a thread to view the messages.</div>
+                        <NewChat onStartChat ={handleStartChat}
+                                 threadId={selectedThread.id}
+                        />
                     )}
                 </Content>
                 <Footer style={{ padding: '5px 7px', backgroundColor: "#F8FAFC" }}>
-                    {selectedThread && (
+                    {selectedThread && selectedThread.id ? (
                         <Input
                             onSendMessage={handleSendMessage}
                             threadId={selectedThread.id}
                             threadName={selectedThread.name}
                         />
+                    ) : (
+                        <div></div>
                     )}
                 </Footer>
             </Layout>
