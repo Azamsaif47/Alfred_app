@@ -1,13 +1,11 @@
 import { Button } from 'antd';
 import { MessageOutlined } from '@ant-design/icons';
-import { useParams } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';// Import the hook
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import './NewChat.css'; // Import the CSS file
 
 const NewChat = () => {
   const { handleStartChat } = useOutletContext();
-  const { threadId } = useParams();
   return (
     <div className="container">
       <div className="card">
@@ -23,7 +21,7 @@ const NewChat = () => {
           <Button
             type="primary"
             icon={<MessageOutlined />}
-            size="large"
+            size="middle"
             onClick={handleStartChat}
           >
             Start Chat

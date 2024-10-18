@@ -14,15 +14,12 @@ const Sidebar = ({ onSelectThread, onStartChat}) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedMenu, setSelectedMenu] = useState(null);
-    const [selectedThreadId, setSelectedThreadId] = useState(null);
+    const [selectedThreadId, setSelectedThreadId] = useState(() => {
+        // Retrieve selectedThreadId from localStorage, if it exists
+        return localStorage.getItem('selectedThreadId') || null;
+    });
     const navigate = useNavigate();
 
-
-    const handleSelectThread = (threadId, threadName) => {
-        setSelectedThreadId(threadId);
-        onSelectThread(threadId, threadName);
-        navigate(`/thread/${threadId}`);
-    };
 
 
     const renderPreviousChats = (threads) => {
@@ -38,6 +35,14 @@ const Sidebar = ({ onSelectThread, onStartChat}) => {
             />
         ));
     };
+
+    const handleSelectThread = (threadId) => {
+        setSelectedThreadId(threadId);
+        localStorage.setItem('selectedThreadId', threadId); // Save to localStorage
+        onSelectThread(threadId);
+        navigate(`/thread/${threadId}`); // Navigate to thread page
+    };
+
     useEffect(() => {
         const fetchThreads = async () => {
             try {

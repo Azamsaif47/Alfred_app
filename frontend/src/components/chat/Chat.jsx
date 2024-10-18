@@ -8,12 +8,12 @@ import { Modal } from 'antd';
 import "./Chat.css";
 
 const Chat = () => {
-    const { messages = [], setMessages } = useOutletContext();
+    const { messages = [], setMessages, isAIThinking  } = useOutletContext();
     const { thread_id } = useParams();
     const baseURL = import.meta.env.VITE_API_URL;
     const messagesEndRef = useRef(null);
-    const [loading, setLoading] = useState(false);
     const [jsonData, setJsonData] = useState({});
+    const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSource, setSelectedSource] = useState(null);
 
