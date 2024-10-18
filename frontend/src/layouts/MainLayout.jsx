@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Layout } from 'antd';
+import {Layout, message} from 'antd';
 import Sidebar from "../components/sidebar/Sidebar.jsx";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
@@ -121,6 +121,7 @@ const MainLayout = () => {
             setThreads((prevThreads) => [newThread, ...prevThreads]);
 
             handleSelectThread(newThread.thread_id, newThread.name);
+            message.success('Chat created successfully.');
         } catch (err) {
             setError("Error creating chat. Please try again.");
             console.error("Error creating chat:", err);
@@ -162,7 +163,7 @@ const MainLayout = () => {
 
                 {/* Conditionally render footer */}
                 {shouldRenderFooter ? (
-                    <Footer style={{ padding: '5px 7px', backgroundColor: "#F8FAFC" }}>
+                    <Footer style={{ padding: '5px 7px',marginBottom:'8px', backgroundColor: "#F8FAFC" }}>
                         <Input
                             onSendMessage={handleSendMessage}
                             threadId={selectedThread.id}

@@ -39,7 +39,7 @@ const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setTh
                 },
             });
             setThreads((prevThreads) => prevThreads.filter((t) => t.thread_id !== thread.thread_id));
-            message.success('Thread deleted successfully.');
+            message.success('Chat deleted successfully.');
         } catch (err) {
             message.error('Error deleting thread.');
         }
@@ -56,7 +56,7 @@ const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setTh
                     t.thread_id === thread.thread_id ? {...t, name: newThreadName} : t
                 )
             );
-            message.success('Thread name updated successfully.');
+            message.success('Chat name updated successfully.');
             setIsEditing(false);
         } catch (err) {
             message.error('Error updating thread name.');
