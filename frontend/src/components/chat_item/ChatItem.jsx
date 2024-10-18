@@ -90,7 +90,13 @@ const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setTh
 
     return (
         <div
-            className={`relative rounded-lg border border-slate-300 p-0.5 dark:border-slate-700 cursor-pointer flex justify-between items-center ${isSelected ? 'bg-[#E2E8F0] text-black' : 'text-black'}`} onClick={() => onSelectThread(thread.thread_id, thread.name)}
+            className={`relative rounded-lg border border-slate-300 p-0.5 dark:border-slate-700 cursor-pointer flex justify-between items-center ${isSelected ? 'bg-[#E2E8F0] text-black' : 'text-black'}`} onClick={() => {
+            // Prevent selecting if already selected
+            if (!isSelected) {
+                onSelectThread(thread.thread_id, thread.name);
+            }
+        }}
+
         >
             <div
                 className="flex p-1 rounded-lg transition-colors duration-200"

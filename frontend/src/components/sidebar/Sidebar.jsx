@@ -7,7 +7,7 @@ import {useNavigate} from "react-router-dom";
 import "./Sidebar.css"
 
 
-const Sidebar = ({ onSelectThread }) => {
+const Sidebar = ({ onSelectThread, onStartChat}) => {
     const [threads, setThreads] = useState([]);
     const baseURL = import.meta.env.VITE_API_URL;
     console.log(baseURL)
@@ -57,27 +57,6 @@ const Sidebar = ({ onSelectThread }) => {
         fetchThreads();
     }, []);
 
-    const handleStartChat = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await axios.post(`${baseURL}/create_thread/`);
-            setThreads((prevThreads) => [
-                {thread_id: response.data.thread_id, name: response.data.name},
-                ...prevThreads,
-            ]);
-            console.log("New thread created:", response.data);
-
-            onSelectThread(response.data.thread_id, response.data.name);
-            navigate(`/thread/${response.data.thread_id}`);
-        } catch (err) {
-            setError("Error creating chat. Please try again.");
-            console.error("Error creating chat:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <aside className="flex">
             <div
@@ -101,7 +80,7 @@ const Sidebar = ({ onSelectThread }) => {
 
                 <div className="mx-2 mt-8">
                     <Button
-                        onClick={handleStartChat}
+                        onClick={onStartChat}
                         className="flex w-full rounded-lg mb-2"
                         type="primary"
                         icon={loading ? <LoadingOutlined/> : <MessageOutlined/>}

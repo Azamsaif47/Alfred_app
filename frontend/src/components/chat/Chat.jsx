@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import ReactMarkdown from 'react-markdown';
 import {Button, Tooltip } from 'antd'
 import { UserOutlined, RobotOutlined, InfoCircleOutlined,FilePdfOutlined } from '@ant-design/icons';
-import { useParams } from "react-router-dom";
+import {useOutletContext, useParams} from "react-router-dom";
 import { Modal } from 'antd';
 import "./Chat.css";
 
-const Chat = ({ messages, setMessages }) => {
+const Chat = () => {
+    const { messages = [], setMessages } = useOutletContext();
     const { thread_id } = useParams();
     const baseURL = import.meta.env.VITE_API_URL;
     const messagesEndRef = useRef(null);
