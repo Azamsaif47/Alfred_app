@@ -11,6 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import inspect
+import uuid
 
 # revision identifiers, used by Alembic.
 revision: str = '2878a3a212c2'
@@ -40,9 +41,9 @@ def upgrade() -> None:
             sa.Column('thread_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('threads.thread_id'), nullable=False),
             sa.Column('role', sa.String(255), nullable=True),
             sa.Column('message_content', sa.Text(), nullable=False),
-            sa.Column('response_metadata', sa.JSON(), nullable=True),
+            sa.Column('response_metadata', sa.JSON(), nullable=True),  # New column 'source' added here
+            sa.Column('message_id', postgresql.UUID(as_uuid=True), nullable=False, default=sa.text('uuid_generate_v4()'))  # New column added
         )
-
 
 def downgrade() -> None:
     # Drop 'messages' table if it exists

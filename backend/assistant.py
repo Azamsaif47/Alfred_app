@@ -112,6 +112,8 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages(
 ).partial(time=datetime.now())
 
 
+
+
 tools = [retriever_tool, list_contacts, create_contact, get_contact_details, find_contact, send_email, generate_chart]
 
 assistant = primary_assistant_prompt | llm.bind_tools(tools)

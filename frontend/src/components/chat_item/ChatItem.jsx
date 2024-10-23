@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {message} from "antd";
 
@@ -22,12 +22,15 @@ const ChatItem = ({ thread, onSelectThread, selectedMenu, setSelectedMenu, setTh
         }
     };
     useEffect(() => {
-
         const savedThreadId = localStorage.getItem('selectedThreadId');
+
+        // Set selectedMenu only if the savedThreadId matches the current thread's ID
         if (savedThreadId === thread.thread_id) {
             setSelectedMenu(thread.thread_id);
+        } else {
+            setSelectedMenu(null); // Prevent dropdown from showing
         }
-    }, [thread.thread_id]);
+    }, [thread.thread_id, setSelectedMenu]);
 
 
     const handleDelete = async () => {

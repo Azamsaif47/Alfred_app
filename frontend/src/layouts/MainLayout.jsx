@@ -12,54 +12,74 @@ const MainLayout = () => {
     const [selectedThread, setSelectedThread] = useState({id: null, name: null});
     const [isAIThinking, setIsAIThinking] = useState(false);
     const [messages, setMessages] = useState([]); // No initial AI message
-    const [loading, setLoading] = useState(false);
     const [source, setSource] = useState([]);
     const baseURL = import.meta.env.VITE_API_URL;
     const [threads, setThreads] = useState([]);
-    const [error, setError] = useState(null);
     const navigate = useNavigate()
     const threadId = useParams();
-    console.log(`on top selected thread: ${JSON.stringify(threadId)}`);
-
-    // Extracting the thread_id from the threadId object
     const { thread_id } = threadId;
+
+    useEffect(() => {
+        const savedThread = localStorage.getItem("selectedThread");
+        if (savedThread) {
+            setSelectedThread(JSON.parse(savedThread)); // Set state from localStorage
+        }
+    }, []);
+
 
 
     useEffect(() => {
-        console.log("Updated source:", source);
     }, [source]);
 
 
     useEffect(() => {
-    const fetchThreads = async () => {
-        try {
-            const response = await axios.get(`${baseURL}/threads/`);
-            const threadData = response.data;
-            setThreads(threadData);
-
-            if (threadId) {
-                const existingThread = threadData.find(t => t.thread_id === threadId);
-                if (existingThread) {
-                    setSelectedThread({ id: existingThread.thread_id, name: existingThread.name });
-                }
+        const fetchThreads = async () => {
+            try {
+                const response = await axios.get(`${baseURL}/threads/`);
+                const threadData = response.data;
+                setThreads(threadData);
+            } catch (error) {
+                console.error("Error fetching threads:", error);
             }
-        } catch (error) {
-            console.error("Error fetching threads:", error);
+        };
+
+        fetchThreads();
+    }, []);
+
+    const handleSelectThread = (thread_id) => {
+        setMessages([]); // Clear messages when a new thread is selected
+        setSelectedThread((prevSelectedThread) => {
+            const updatedThread = { ...prevSelectedThread, id: thread_id };
+            // Save the selected thread to localStorage
+            localStorage.setItem("selectedThread", JSON.stringify(updatedThread));
+            return updatedThread;
+        });
+    };
+
+    useEffect(() => {
+        if (selectedThread.id) { // Only fetch if thread_id is valid
+            const fetchThreadName = async () => {
+                try {
+                    const response = await axios.get(`${baseURL}/threads/`);
+                    const threadData = response.data;
+
+                    // Find the thread with the matching thread_id
+                    const foundThread = threadData.find(thread => thread.thread_id === selectedThread.id);
+
+                    // If thread is found, update selectedThread state
+                    if (foundThread) {
+                        setSelectedThread({ id: foundThread.thread_id, name: foundThread.name });
+                    } else {
+                        console.error("Thread not found");
+                    }
+                } catch (error) {
+                    console.error("Error fetching threads:", error);
+                }
+            };
+
+            fetchThreadName();
         }
-    };
-
-    fetchThreads();
-}, [threadId]);
-
-    console.log(threadId)
-    const handleSelectThread = (threadId, threadName) => {
-        console.log(`inside the function ${threadId}`)
-        setSelectedThread({id: threadId, name: threadName});
-        console.log(selectedThread.id)
-        setMessages([]); // Reset messages when a new thread is selected
-        navigate(`/thread/${threadId}`); // Update the URL with the selected threadId
-    };
-
+    }, [selectedThread.id]);
 
     const handleSendMessage = async (message, threadId, threadName) => {
         const newMessage = {
@@ -69,9 +89,7 @@ const MainLayout = () => {
             avatar: "https://example.com/human-avatar.png",
         };
 
-        // Update messages with new human message
         setMessages((prevMessages) => [...prevMessages, newMessage]);
-        setLoading(true);
         setIsAIThinking(true);
 
         try {
@@ -93,7 +111,6 @@ const MainLayout = () => {
             };
             setMessages((prevMessages) => [...prevMessages, aiMessage]);
             setSource(aiSource);
-            console.log(setSource);
         } catch (error) {
             console.error("Error sending message:", error);
 
@@ -105,15 +122,10 @@ const MainLayout = () => {
             };
 
             setMessages((prevMessages) => [...prevMessages, errorMessage]);
-        } finally {
-            setLoading(false);
         }
     };
 
     const handleStartChat = async () => {
-        console.log("the handle start function is called")
-        setLoading(true);
-        setError(null);
         try {
             const response = await axios.post(`${baseURL}/create_thread/`);
             const newThread = {thread_id: response.data.thread_id, name: response.data.name};
@@ -121,26 +133,24 @@ const MainLayout = () => {
             setThreads((prevThreads) => [newThread, ...prevThreads]);
 
             handleSelectThread(newThread.thread_id, newThread.name);
+            navigate(`/thread/${newThread.thread_id}`);
             message.success('Chat created successfully.');
         } catch (err) {
-            setError("Error creating chat. Please try again.");
             console.error("Error creating chat:", err);
         } finally {
-            setLoading(false);
             setIsAIThinking(false);
         }
     };
 
-
     const shouldRenderFooter = thread_id
-    console.log(`the selected thread is ${shouldRenderFooter}`)
-
     return (
         <Layout style={{ height: "100vh" }}>
             <Sider width={250} style={{ background: "#E2E8F0" }}>
                 <Sidebar
                     onSelectThread={handleSelectThread}
                     threads={threads}
+                    threadId ={selectedThread.id}
+                    threadName={selectedThread.name}
                     onStartChat={handleStartChat}
                 />
             </Sider>
@@ -160,8 +170,6 @@ const MainLayout = () => {
                         handleStartChat
                     }} />
                 </Content>
-
-                {/* Conditionally render footer */}
                 {shouldRenderFooter ? (
                     <Footer style={{ padding: '5px 7px',marginBottom:'8px', backgroundColor: "#F8FAFC" }}>
                         <Input
@@ -171,7 +179,7 @@ const MainLayout = () => {
                         />
                     </Footer>
                 ) : (
-                    <div></div> // Empty div when no chat is selected
+                    <div></div>
                 )}
             </Layout>
         </Layout>

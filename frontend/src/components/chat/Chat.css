@@ -92,3 +92,67 @@
         transform: scale(0);
     }
 }
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px; /* Space below the table */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    border-radius: 8px; /* Rounded corners */
+    overflow: hidden; /* Ensures rounded corners are visible */
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px; /* Space below the table */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    border-radius: 8px; /* Rounded corners */
+    overflow: hidden; /* Ensures rounded corners are visible */
+}
+
+/* Header Styling */
+th {
+    background-color: #1890FF; /* Blue header */
+    color: white; /* White text for contrast */
+    padding: 8px; /* Reduced padding for header */
+    font-weight: bold; /* Bold text for emphasis */
+    text-align: left;
+    font-size: 14px; /* Smaller font size for header */
+}
+
+/* Cell Styling */
+th, td {
+    border: 1px solid #ddd; /* Light gray border */
+    padding: 8px; /* Reduced padding for cells */
+    text-align: left;
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+    font-size: 14px; /* Smaller font size for cells */
+}
+
+/* Row Hover Effect */
+tr:hover {
+    background-color: #f1f1f1; /* Light gray background on hover */
+}
+
+/* Alternating Row Colors */
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Light gray for even rows */
+}
+
+tr:nth-child(odd) {
+    background-color: white; /* White for odd rows */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    th, td {
+        padding: 6px; /* Further adjust padding for smaller screens */
+        font-size: 12px; /* Smaller font size for smaller screens */
+    }
+}
+
+
+

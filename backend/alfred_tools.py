@@ -29,6 +29,7 @@ llm = ChatOpenAI(model_name='gpt-4o-2024-08-06', temperature=0)
 combine_docs_chain = create_stuff_documents_chain(llm, prompt)
 rag_chain = create_retrieval_chain(vectorstore.as_retriever(), combine_docs_chain)
 
+import time
 
 
 @tool
@@ -39,8 +40,20 @@ def retriever_tool(query: str = None):
        information and answer their question. Be sure to include the source provided in the JSON format with your answer,
        as the source is essential for accuracy.
     """
+    # Start the timer
+    start_time = time.time()
+
+    # Invoke the RAG chain
     llm_response = rag_chain.invoke({"input": query})
+
+    # Repair the JSON response
     response = repair_json(str(llm_response))
+
+    # Calculate the response time
+    response_time = time.time() - start_time
+
+    # Print the response time
+    print(f"Response time: {response_time:.4f} seconds")
 
     return response
 

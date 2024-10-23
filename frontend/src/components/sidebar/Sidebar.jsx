@@ -10,31 +10,33 @@ import "./Sidebar.css"
 const Sidebar = ({ onSelectThread, onStartChat}) => {
     const [threads, setThreads] = useState([]);
     const baseURL = import.meta.env.VITE_API_URL;
-    console.log(baseURL)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedMenu, setSelectedMenu] = useState(null);
     const [selectedThreadId, setSelectedThreadId] = useState(() => {
-        // Retrieve selectedThreadId from localStorage, if it exists
         return localStorage.getItem('selectedThreadId') || null;
     });
     const navigate = useNavigate();
 
-
-
     const renderPreviousChats = (threads) => {
         return threads.map((thread) => (
-            <ChatItem
-                key={thread.thread_id}
-                thread={thread}
-                onSelectThread={handleSelectThread}
-                isSelected={selectedThreadId === thread.thread_id}
-                selectedMenu={selectedMenu}
-                setSelectedMenu={setSelectedMenu}
-                setThreads={setThreads}
-            />
+                <ChatItem
+                    key={thread.thread_id}
+                    thread={thread}
+                    onSelectThread={handleSelectThread}
+                    isSelected={selectedThreadId === thread.thread_id}
+                    selectedMenu={selectedMenu}
+                    setSelectedMenu={setSelectedMenu}
+                    setThreads={setThreads}
+                />
         ));
     };
+
+    useEffect(() => {
+        // Call fetchThreads whenever onStartChat is invoked
+        fetchThreads();
+    }, [onStartChat]);
+
 
     const handleSelectThread = (threadId) => {
         setSelectedThreadId(threadId);
@@ -43,24 +45,40 @@ const Sidebar = ({ onSelectThread, onStartChat}) => {
         navigate(`/thread/${threadId}`); // Navigate to thread page
     };
 
-    useEffect(() => {
-        const fetchThreads = async () => {
-            try {
-                const response = await axios.get(`${baseURL}/threads/`);
-                console.log("Response data:", response.data); // Log the response
-
-                // Check if response.data is an array and set it to state
-                if (Array.isArray(response.data)) {
-                    setThreads(response.data.reverse()); // Reverse the array before setting
-                } else {
-                    console.error("Expected an array but received:", response.data);
-                }
-            } catch (error) {
-                console.error("Error fetching threads:", error);
+    const fetchThreads = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${baseURL}/threads/`);
+            if (Array.isArray(response.data)) {
+                setThreads(response.data.reverse());
+            } else {
+                console.error("Expected an array but received:", response.data);
             }
-        };
+        } catch (error) {
+            console.error("Error fetching threads:", error);
+            setError("Failed to load threads.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchThreads();
     }, []);
+
+
+    const handleNewChat = async () => {
+        setLoading(true);
+        try {
+            await onStartChat(); // Assuming this creates a new chat
+            await fetchThreads(); // Refetch threads after creating a new chat
+        } catch (error) {
+            console.error("Error starting a new chat:", error);
+            setError("Failed to create a new chat.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <aside className="flex">
@@ -85,7 +103,7 @@ const Sidebar = ({ onSelectThread, onStartChat}) => {
 
                 <div className="mx-2 mt-8">
                     <Button
-                        onClick={onStartChat}
+                        onClick={handleNewChat}
                         className="flex w-full rounded-lg mb-2"
                         type="primary"
                         icon={loading ? <LoadingOutlined/> : <MessageOutlined/>}

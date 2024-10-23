@@ -1,29 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import React,{ useEffect, useRef, useState } from "react";
 import axios from "axios";
 import ReactMarkdown from 'react-markdown';
-import {Button, Tooltip } from 'antd'
+import {Button, Tooltip, Modal } from 'antd'
 import { UserOutlined, RobotOutlined, InfoCircleOutlined,FilePdfOutlined } from '@ant-design/icons';
 import {useOutletContext, useParams} from "react-router-dom";
-import { Modal } from 'antd';
 import "./Chat.css";
+import remarkGfm from 'remark-gfm';
 
 const Chat = () => {
-    const { messages = [], setMessages, isAIThinking  } = useOutletContext();
+    const { messages = [], setMessages } = useOutletContext();
     const { thread_id } = useParams();
     const baseURL = import.meta.env.VITE_API_URL;
     const messagesEndRef = useRef(null);
-    const [jsonData, setJsonData] = useState({});
     const [loading, setLoading] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [open, setOpen] = useState(false);
     const [selectedSource, setSelectedSource] = useState(null);
 
     const handleSourceClick = (source) => {
         setSelectedSource(source.page_content);
-        setIsModalOpen(true);
+        setOpen(true);
     };
 
+
     const closeModal = () => {
-        setIsModalOpen(false);
+        setOpen(false);
         setSelectedSource(null);
     };
 
@@ -35,8 +35,50 @@ const Chat = () => {
                     const response = await axios.post(`${baseURL}/messages/`, {
                         thread_id: thread_id,
                     });
-                    setMessages(response.data);
-                    setJsonData(response.data.sources);
+
+                    // Step 1: Create a mapping of sources by message_id
+                    const sourceMap = {};
+
+                    // Populate the sourceMap with sources
+                    response.data.sources.forEach(source => {
+                        const { message_id, source: sourceName, page_content } = source;
+
+                        // Initialize the array for this message_id if it doesn't exist
+                        if (!sourceMap[message_id]) {
+                            sourceMap[message_id] = [];
+                        }
+
+                        // Push the source object to the array, keeping both page_content and metadata.source
+                        sourceMap[message_id].push({
+                            page_content: page_content || '', // Direct access to page_content for modal display
+                            metadata: {
+                                source: sourceName || '', // Store source name in metadata for title
+                            },
+                        });
+                    });
+
+                    // Step 2: Process the response data to merge messages with their sources
+                    const messagesWithMetadata = response.data.response.map((message, index) => {
+                        const msgObj = {
+                            ...message,
+                            id: message.id || index, // Assign an id if not present
+                            sources: [], // Initialize sources as an empty array
+                        };
+
+                        // Check if the message is from AI
+                        if (message.role === "AI") {
+                            // Use the message_id to find corresponding sources
+                            const sourcesForMessage = sourceMap[message.message_id]; // Match on message_id
+                            if (sourcesForMessage) {
+                                msgObj.sources = sourcesForMessage; // Merge sources with message
+                            }
+                        }
+
+                        return msgObj; // Return the processed message object
+                    });
+
+                    // Update state with the processed messages
+                    setMessages(messagesWithMetadata);
                 } catch (error) {
                     console.error("Error fetching messages:", error);
                 } finally {
@@ -47,6 +89,10 @@ const Chat = () => {
 
         fetchMessages();
     }, [thread_id, setMessages]);
+
+
+
+
 
     const handleJsonDisplay = (jsonData) => {
         alert(JSON.stringify(jsonData, null, 2));
@@ -88,7 +134,7 @@ const Chat = () => {
                                     msg.role === "AI" ? "bg-slate-50 dark:bg-slate-800" : "bg-blue-50 dark:bg-blue-800"
                                 } sm:max-w-md md:max-w-2xl`}
                             >
-                                <ReactMarkdown>{msg.message_content}</ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.message_content}</ReactMarkdown>
 
                                 {msg.sources && msg.sources.length > 0 && (
                                     <>
@@ -98,42 +144,46 @@ const Chat = () => {
                                         </div>
 
                                         <div className="mt-2 flex space-x-2"> {/* Use flex container for buttons */}
-                                            {msg.sources.map((source, index) => (
-                                                <Tooltip key={index} title={source.metadata.source.split("\\").pop()}
-                                                         placement="top">
-                                                    <Button
-                                                        type="primary"
-                                                        size="small" // Set button size to small
-                                                        className="flex items-center"
-                                                        onClick={() => handleSourceClick(source)}
-                                                        style={{
-                                                            backgroundColor: '#1890ff', // Ant Design primary color
-                                                            borderColor: '#1890ff',
-                                                            borderRadius: '5px',// Match border color to primary
-                                                            color: 'white', // Set text color to white
-                                                            maxWidth: '150px', // Set a smaller maximum width
-                                                            overflow: 'hidden',
-                                                            whiteSpace: 'nowrap', // Keep text on one line
-                                                            textOverflow: 'ellipsis', // Add ellipsis for overflow text
-                                                            marginRight: '8px', // Add space between buttons
-                                                            padding: '6px 8px', // Add padding to the button (top-bottom, left-right)
-                                                            display: 'inline-flex', // Use inline-flex for proper alignment
-                                                            alignItems: 'center', // Center align items
-                                                        }}
+                                            {msg.sources.map((source, index) => {
+                                                return (
+                                                    <Tooltip
+                                                        key={index}
+                                                        title={source.metadata.source.split("\\").pop()} // Display the file name in the tooltip
+                                                        placement="top"
                                                     >
-                                                        <FilePdfOutlined className="mr-1" />
-                                                        <span style={{
-                                                            flex: '1 1 auto', // Allow it to grow and shrink
-                                                            overflow: 'hidden', // Hide overflow
-                                                            textOverflow: 'ellipsis', // Show ellipsis
-                                                            whiteSpace: 'nowrap', // Prevent text wrap
-                                                        }}>{source.metadata.source.split("\\").pop()}</span>
-                                                    </Button>
-
-
-                                                </Tooltip>
-                                            ))}
+                                                        <Button
+                                                            type="primary"
+                                                            size="small" // Set button size to small
+                                                            className="flex items-center"
+                                                            onClick={() => handleSourceClick(source)}
+                                                            style={{
+                                                                backgroundColor: '#1890ff', // Ant Design primary color
+                                                                borderColor: '#1890ff',
+                                                                borderRadius: '5px', // Match border color to primary
+                                                                color: 'white', // Set text color to white
+                                                                maxWidth: '150px', // Set a smaller maximum width
+                                                                overflow: 'hidden',
+                                                                whiteSpace: 'nowrap', // Keep text on one line
+                                                                textOverflow: 'ellipsis', // Add ellipsis for overflow text
+                                                                marginRight: '8px', // Add space between buttons
+                                                                padding: '6px 8px', // Add padding to the button (top-bottom, left-right)
+                                                                display: 'inline-flex', // Use inline-flex for proper alignment
+                                                                alignItems: 'center', // Center align items
+                                                            }}
+                                                        >
+                                                            <FilePdfOutlined className="mr-1"/>
+                                                            <span style={{
+                                                                flex: '1 1 auto', // Allow it to grow and shrink
+                                                                overflow: 'hidden', // Hide overflow
+                                                                textOverflow: 'ellipsis', // Show ellipsis
+                                                                whiteSpace: 'nowrap', // Prevent text wrap
+                                                            }}>{source.metadata.source.split("\\").pop()}</span>
+                                                        </Button>
+                                                    </Tooltip>
+                                                );
+                                            })}
                                         </div>
+
                                     </>
                                 )}
 
@@ -144,22 +194,15 @@ const Chat = () => {
                                     />
                                 )}
 
-                                {isModalOpen && selectedSource && (
+                                {open && selectedSource && (
                                     <Modal
                                         title="Source Content"
-                                        open={isModalOpen}  // Use 'open' instead of 'visible'
+                                        open={open}
+                                        onOk={closeModal}
                                         onCancel={closeModal}
-                                        footer={null}
-                                        mask={false}  // Disables the background mask completely
-                                        style={{
-                                            maxHeight: '80vh',
-                                            overflowY: 'auto',
-                                        }}
+
                                     >
-                                        <pre style={{
-                                            whiteSpace: "pre-wrap",
-                                            wordBreak: "break-word"
-                                        }}>{selectedSource}</pre>
+                                        <p>{selectedSource}</p>
                                     </Modal>
                                 )}
                             </div>
