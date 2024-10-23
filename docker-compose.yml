@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: alfred
+      POSTGRES_DB: final
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -19,8 +19,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: fastapi_backend
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:admin@postgres_db:5432/alfred
-      STORE_DATABASE_URL: postgresql://postgres:admin@localhost:5432/alfred
+      DATABASE_URL: postgresql+asyncpg://postgres:admin@postgres_db:5432/final
+      STORE_DATABASE_URL: postgresql://postgres:admin@postgres_db:5432/final
       OPENAI_API_KEY: sk-proj-zgXqKiXJ3flv7xFoBvdjT3BlbkFJ1hezS1kRuOsw0jTkBEjE
     volumes:
       - ./backend:/app
