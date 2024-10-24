@@ -2,10 +2,8 @@ services:
   db:
     image: postgres:16
     container_name: postgres_db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: final
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -14,14 +12,12 @@ services:
       - alfred_app_default
 
   backend:
-    build: 
+    build:
       context: .
       dockerfile: backend/Dockerfile
     container_name: fastapi_backend
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:admin@postgres_db:5432/final
-      STORE_DATABASE_URL: postgresql://postgres:admin@postgres_db:5432/final
-      OPENAI_API_KEY: sk-proj-zgXqKiXJ3flv7xFoBvdjT3BlbkFJ1hezS1kRuOsw0jTkBEjE
+    env_file:
+      - .env
     volumes:
       - ./backend:/app
     ports:
@@ -38,18 +34,16 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        VITE_API_URL: http://localhost:8000
+        VITE_API_URL: ${VITE_API_URL}
     container_name: react_frontend
-
     ports:
       - "3000:80"
     depends_on:
       - backend
 
-
 volumes:
   postgres_data:
 
 networks:
-  alfred_app_default:  # Define the network here
+  alfred_app_default:
     driver: bridge
