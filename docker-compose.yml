@@ -1,3 +1,5 @@
+version: '3.8'  # Specify the version of Docker Compose
+
 services:
   db:
     image: postgres:16
@@ -10,6 +12,11 @@ services:
       - "5432:5432"
     networks:
       - alfred_app_default
+    healthcheck:  # Add a health check for PostgreSQL
+      test: ["CMD-SHELL", "pg_isready -U your_user_name"]  # Replace with your PostgreSQL user
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -23,7 +30,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # Wait for db to be healthy
     command: >
       bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
     networks:

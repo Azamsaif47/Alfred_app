@@ -15,8 +15,12 @@ load_dotenv()
 CONTACTS_URL = os.getenv('CONTACTS_URL')
 CHART_URL = os.getenv('CHART_URL')
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+
 vectorstore = FAISS.load_local(
-    folder_path="D:/GitHub/new_alfred_app/Alfred_app/backend/Vector_store/new_alfred",
+    folder_path = os.path.join(BASE_DIR, "Vector_store", "new_alfred"),
     embeddings=OpenAIEmbeddings(),
     index_name="faiss.index",
     allow_dangerous_deserialization=True

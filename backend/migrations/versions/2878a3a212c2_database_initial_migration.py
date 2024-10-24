@@ -6,11 +6,11 @@ Create Date: 2024-10-14 10:22:10.281331
 
 """
 from typing import Sequence, Union
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import inspect
-from sqlalchemy import create_engine
 import uuid
 
 # revision identifiers, used by Alembic.
@@ -19,25 +19,9 @@ down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+
 def upgrade() -> None:
-    connection = op.get_bind()
-    # Get the database URL from the Alembic config
-    url = connection.engine.url
-
-    # Create a separate engine to connect to the server
-    server_engine = create_engine(url.set(database=None))  # Remove the database name for server connection
-
-    # Create the database if it does not exist
-    db_name = url.database
-    with server_engine.connect() as server_connection:
-        result = server_connection.execute(f"SELECT 1 FROM pg_database WHERE datname = '{db_name}'")
-        exists = result.fetchone() is not None
-
-        if not exists:
-            server_connection.execute(f"CREATE DATABASE \"{db_name}\"")
-
-    # Now we can create the tables in the database
-    inspector = inspect(connection)
+    inspector = inspect(op.get_bind())
 
     # Check if the 'threads' table exists
     if 'threads' not in inspector.get_table_names():
@@ -62,13 +46,10 @@ def upgrade() -> None:
         )
 
 def downgrade() -> None:
-    connection = op.get_bind()
-    inspector = inspect(connection)
-
     # Drop 'messages' table if it exists
-    if 'messages' in inspector.get_table_names():
+    if op.get_bind().has_table('messages'):
         op.drop_table('messages')
 
     # Drop 'threads' table if it exists
-    if 'threads' in inspector.get_table_names():
+    if op.get_bind().has_table('threads'):
         op.drop_table('threads')
