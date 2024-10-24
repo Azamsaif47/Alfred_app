@@ -1,5 +1,8 @@
 from typing import Annotated
 from typing_extensions import TypedDict
+from datetime import datetime
+import os
+from dotenv import load_dotenv
 from langgraph.graph.message import AnyMessage, add_messages
 from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableLambda
@@ -8,51 +11,48 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START
 from langgraph.prebuilt import tools_condition
-from datetime import datetime
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
-from alfred_tools import list_contacts,create_contact, get_contact_details, find_contact, send_email, generate_chart, retriever_tool
-from dotenv import load_dotenv
-import os
 
+# Local imports
+from services.tools import (list_contacts, create_contact,
+                            get_contact_details, find_contact,
+                            send_email, generate_chart,
+                            retriever_tool)
+
+# Load environment variables
 load_dotenv()
-
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-
-
-
 def handle_tool_error(state) -> dict:
+    """Handle errors during tool invocation."""
     error = state.get("error")
     tool_calls = state["messages"][-1].tool_calls
     return {
         "messages": [
             ToolMessage(
-                content=f"Error: {repr(error)}\n please fix your mistakes.",
+                content=f"Error: {repr(error)}\n Please fix your mistakes.",
                 tool_call_id=tc["id"],
             )
             for tc in tool_calls
         ]
     }
 
-
-def create_tool_node_with_fallback(tools: list) -> dict:
+def create_tool_node_with_fallback(tools: list) -> ToolNode:
+    """Create a ToolNode with fallback error handling."""
     return ToolNode(tools).with_fallbacks(
         [RunnableLambda(handle_tool_error)], exception_key="error"
     )
 
-
-
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
-
-
 
 class Assistant:
     def __init__(self, runnable: Runnable):
         self.runnable = runnable
 
-    def __call__(self, state: State, config: RunnableConfig):
+    def __call__(self, state: State, config: RunnableConfig) -> dict:
+        """Invoke the assistant with the given state and configuration."""
         while True:
             configuration = config.get("configurable", {})
             passenger_id = configuration.get("passenger_id", None)
@@ -70,8 +70,10 @@ class Assistant:
                 break
         return {"messages": result}
 
+# Initialize ChatOpenAI model
 llm = ChatOpenAI(model_name='gpt-4o-2024-08-06', temperature=0)
 
+# Define the primary assistant prompt
 primary_assistant_prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -81,19 +83,19 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages(
             "Your objectives are to answer user queries about the asphalt industry, case studies, tests, and the company, "
             "using the information in your retriever tool and other tools. Always refer to the provided context and knowledge base for answering user questions. "
             "This is super important. Do not make things on your own. Answer precisely and to the point."
-            "and do not show the source in your output"
-            "in your retriever tool you have some documents which include different question related to Surface Tech "
-            "i want you give 3 messages must as a sugggestion with every output related to surface tech it should be represent after a line break of output message"
-            "the structure of suggestion questions must be like this output then line break(crucial) then word suggestion and below suggested questions"
-            "and send the suggested question in another json then the message content"
-            "when user ask something about surface tech and you answer that also send some suggestion of questions according to that specific context"
+            "and do not show the source in your output."
+            "in your retriever tool you have some documents which include different question related to Surface Tech. "
+            "I want you to give 3 suggestions as a must with every output related to Surface Tech, represented after a line break of the output message."
+            "The structure of suggested questions must be like this output then line break (crucial) then word suggestion and below suggested questions."
+            "And send the suggested questions in another JSON then the message content."
+            "When the user asks something about Surface Tech and you answer, also send some suggestions of questions according to that specific context."
             "\n\nEngagement Strategy:\n"
             "- Ask questions to understand the user's specific needs.\n"
             "- Recommend relevant services from the knowledge base based on the user's response.\n"
             "\nBehavior:\n"
             "- Only answer questions related to Surface Tech. This is crucial.\n"
-            "- If a user asks you to do tasks out of scope of Surface Tech, politely refuse.\n"
-            "- Provide the links to the files mentioned in the citation or context on user request as https://cdn.three60.click/alfred/files/FILE_NAME_HERE.EXT.\n"
+            "- If a user asks you to do tasks out of the scope of Surface Tech, politely refuse.\n"
+            "- Provide links to the files mentioned in the citation or context on user request as https://cdn.three60.click/alfred/files/FILE_NAME_HERE.EXT.\n"
             "\nVisualization:\n"
             "- Use the visualize_chart tool to generate different types of charts to visualize data for the user. "
             "Display the chart in an image with at least 500px of width.\n"
@@ -111,32 +113,25 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(time=datetime.now())
 
-
-
-
+# Define tools
 tools = [retriever_tool, list_contacts, create_contact, get_contact_details, find_contact, send_email, generate_chart]
 
+# Create the assistant with tools
 assistant = primary_assistant_prompt | llm.bind_tools(tools)
 
-
-
+# Build the state graph
 builder = StateGraph(State)
-
 
 # Define nodes: these do the work
 builder.add_node("assistant", Assistant(assistant))
 builder.add_node("tools", create_tool_node_with_fallback(tools))
+
 # Define edges: these determine how the control flow moves
 builder.add_edge(START, "assistant")
-builder.add_conditional_edges(
-    "assistant",
-    tools_condition,
-)
+builder.add_conditional_edges("assistant", tools_condition)
 builder.add_edge("tools", "assistant")
 
 # The checkpointer lets the graph persist its state
 # this is a complete memory for the entire graph.
 memory = MemorySaver()
 agent = builder.compile(checkpointer=memory)
-
-

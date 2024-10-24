@@ -16,7 +16,7 @@ CONTACTS_URL = os.getenv('CONTACTS_URL')
 CHART_URL = os.getenv('CHART_URL')
 
 vectorstore = FAISS.load_local(
-    folder_path="Vector_store/new_alfred",
+    folder_path="D:/GitHub/new_alfred_app/Alfred_app/backend/Vector_store/new_alfred",
     embeddings=OpenAIEmbeddings(),
     index_name="faiss.index",
     allow_dangerous_deserialization=True
@@ -40,21 +40,9 @@ def retriever_tool(query: str = None):
        information and answer their question. Be sure to include the source provided in the JSON format with your answer,
        as the source is essential for accuracy.
     """
-    # Start the timer
-    start_time = time.time()
 
-    # Invoke the RAG chain
     llm_response = rag_chain.invoke({"input": query})
-
-    # Repair the JSON response
     response = repair_json(str(llm_response))
-
-    # Calculate the response time
-    response_time = time.time() - start_time
-
-    # Print the response time
-    print(f"Response time: {response_time:.4f} seconds")
-
     return response
 
 
