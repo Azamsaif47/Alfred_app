@@ -4,6 +4,8 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI
 from langchain.chains import create_retrieval_chain
+from langchain_ollama import ChatOllama
+from langchain_ollama import OllamaEmbeddings
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from dotenv import load_dotenv
 from json_repair import repair_json
@@ -19,6 +21,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 
+
+
 vectorstore = FAISS.load_local(
     folder_path = os.path.join(BASE_DIR, "Vector_store", "new_alfred"),
     embeddings=OpenAIEmbeddings(),
@@ -28,12 +32,10 @@ vectorstore = FAISS.load_local(
 
 prompt = hub.pull("langchain-ai/retrieval-qa-chat")
 
-llm = ChatOpenAI(model_name='gpt-4o-2024-08-06', temperature=0)
+llm = ChatOllama(model='llama3.2:latest', temperature=0)
 
 combine_docs_chain = create_stuff_documents_chain(llm, prompt)
 rag_chain = create_retrieval_chain(vectorstore.as_retriever(), combine_docs_chain)
-
-import time
 
 
 @tool
@@ -44,9 +46,11 @@ def retriever_tool(query: str = None):
        information and answer their question. Be sure to include the source provided in the JSON format with your answer,
        as the source is essential for accuracy.
     """
-
+    print("retriever_tool is called")
+    print(f"llm question from tool {query}")
     llm_response = rag_chain.invoke({"input": query})
     response = repair_json(str(llm_response))
+    print(f"the tool response {response}")
     return response
 
 
@@ -61,6 +65,7 @@ def list_contacts(search: str = None):
     Returns:
         dict: API response as JSON.
     """
+    print("list_contacts is called")
     api_base_url = CONTACTS_URL
     token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
     headers = {
@@ -88,6 +93,7 @@ def create_contact(first_name: str, email: str, last_name: str = None, phone: st
     Returns:
         dict: API response as JSON.
     """
+    print("create_contact is called")
     api_base_url = CONTACTS_URL
     token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
     headers = {
@@ -118,6 +124,7 @@ def get_contact_details(contact_id: str):
     Returns:
         dict: API response as JSON.
     """
+    print("get_contact_details is called")
     api_base_url = CONTACTS_URL
     token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
     headers = {
@@ -144,6 +151,7 @@ def find_contact(first_name: str = None, last_name: str = None, email: str = Non
     Returns:
         dict: API response as JSON.
     """
+    print("find_contact is called")
     api_base_url = CONTACTS_URL
     token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
     headers = {
@@ -187,6 +195,7 @@ def send_email(subject: str, html: str, to: list, cc: list = None, bcc: list = N
         - "cc": ["cc@example.com"]
         - "bcc": ["bcc@example.com"]
     """
+    print("send_email is called")
     api_base_url = CONTACTS_URL
     token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
     headers = {
@@ -228,6 +237,7 @@ def generate_chart(chart_type: str, data: dict, title: str = None) -> dict:
 
     Sends the user-provided data as the payload and returns the URL of the generated SVG chart or an error message.
     """
+    print("generate chart tool is called")
 
     url = CHART_URL
 

@@ -32,7 +32,7 @@ async def run_ai(user_input: UserInput, db: AsyncSession = Depends(get_db)):
     try:
         # Pass the 'db' session to the 'run_ai_thread' function
         response, sources = await run_ai_thread(user_input.user_input, user_input.thread_id, user_input.thread_name, db)
-
+        print(response)
         return {
             "message": "AI thread started successfully.",
             "response": response,

@@ -11,13 +11,16 @@ from langchain.text_splitter import CharacterTextSplitter
 import docx2txt
 from PyPDF2 import PdfReader
 import psycopg2
+from langchain_ollama import OllamaEmbeddings
 from Crypto.Cipher import AES
+from langchain_huggingface import HuggingFaceEmbeddings
+
 
 load_dotenv()
 
 
 database_url = os.getenv('DATABASE_URL')
-openai.api_key = os.getenv('OPENAI_API_KEY')
+
 
 
 def connect_db():
@@ -79,11 +82,11 @@ def load_and_split_documents(doc_folder):
 
 
 
-doc_folder = "path_to_your_docs"
+doc_folder = "./Docs"
 
 
 folder_name = input("Enter the name for the folder to save the vector store: ")
-folder_path = os.path.join("Path_for_vectorstore", folder_name)
+folder_path = os.path.join("../Vector_store", folder_name)
 
 
 os.makedirs(folder_path, exist_ok=True)
@@ -101,7 +104,13 @@ text_splitter = CharacterTextSplitter(
 
 docs = text_splitter.split_documents(loaded_documents)
 
-embeddings = OpenAIEmbeddings()
+embed_model = HuggingFaceEmbeddings(
+    model_name="meta-llama/Llama-3.1-8B-Instruct"
+)
+
+
+
+embeddings = embed_model.get_text_embedding(docs)
 
 
 vectordb = FAISS.from_documents(
