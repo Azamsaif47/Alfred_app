@@ -130,38 +130,17 @@ async def process_sources(messages):
 
 
 async def run_ai_thread(user_input: str, thread_id: uuid.UUID, thread_name: str, db: AsyncSession):
-    start_time = time.time()
+    if not await thread_exists(thread_id, db):
+        await save_thread_to_db(ThreadCreate(thread_id=thread_id, name=thread_name), db)
 
-    # Check if thread exists
-    thread_exists_start = time.time()
-    if not await thread_exists(thread_id, db):  # Pass 'db' to thread_exists
-        await save_thread_to_db(ThreadCreate(thread_id=thread_id, name=thread_name), db)  # Pass 'db' to save_thread_to_db
-    thread_exists_duration = time.time() - thread_exists_start
-    print(f"[DEBUG] Time taken to check and save thread: {thread_exists_duration:.4f} seconds")
-
-    # Invoke the AI agent
-    ai_invoke_start = time.time()
     res = await agent.ainvoke(
         {"messages": [("human", user_input)]},
         config={"configurable": {"thread_id": str(thread_id), "thread_name": thread_name}}
     )
-    ai_invoke_duration = time.time() - ai_invoke_start
-    print(f"[DEBUG] Time taken for AI invocation: {ai_invoke_duration:.4f} seconds")
 
-    # Process AI messages
-    process_ai_messages_start = time.time()
     await process_ai_messages(res['messages'], thread_id)
-    process_ai_messages_duration = time.time() - process_ai_messages_start
-    print(f"[DEBUG] Time taken to process AI messages: {process_ai_messages_duration:.4f} seconds")
 
-    # Process sources
-    process_sources_start = time.time()
     sources = await process_sources(res['messages'])
-    process_sources_duration = time.time() - process_sources_start
-    print(f"[DEBUG] Time taken to process sources: {process_sources_duration:.4f} seconds")
-
-    total_duration = time.time() - start_time
-    print(f"[DEBUG] Total time taken for run_ai_thread: {total_duration:.4f} seconds")
 
     return res['messages'][-1].content if res['messages'] else None, sources
 

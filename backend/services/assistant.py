@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from langgraph.graph.message import AnyMessage, add_messages
-from langchain_core.messages import ToolMessage
+from langchain_core.messages import ToolMessage, SystemMessage, AIMessage
 from langchain_core.runnables import RunnableLambda
 from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
@@ -13,6 +13,7 @@ from langgraph.graph import StateGraph, START
 from langgraph.prebuilt import tools_condition
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
+from mem0 import MemoryClient
 
 # Local imports
 from services.tools import (list_contacts, create_contact,
@@ -23,6 +24,9 @@ from services.tools import (list_contacts, create_contact,
 # Load environment variables
 load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+MEMO_API_KEY = os.getenv('MEMO_API_KEY')
+client = MemoryClient(api_key=MEMO_API_KEY)
+
 
 def handle_tool_error(state) -> dict:
     """Handle errors during tool invocation."""
@@ -46,6 +50,7 @@ def create_tool_node_with_fallback(tools: list) -> ToolNode:
 
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
+    mem0_user_id: str
 
 class Assistant:
     def __init__(self, runnable: Runnable):
@@ -122,6 +127,32 @@ assistant = primary_assistant_prompt | llm.bind_tools(tools)
 # Build the state graph
 builder = StateGraph(State)
 
+
+messages = [
+    {"role": "user", "content": "Hi, I'm Alex. I'm a vegetarian and I'm allergic to nuts."},
+    {"role": "assistant", "content": "Hello Alex! I've noted that you're a vegetarian and have a nut allergy. I'll keep this in mind for any food-related recommendations or discussions."}
+]
+client.add(messages, user_id="43bff7c7-c71b-4fae-bccf-405bcb6b263d")
+
+memories = client.search(messages[-1]['content'], user_id="43bff7c7-c71b-4fae-bccf-405bcb6b263d")
+
+context = "Relevant information from previous conversations:\n"
+for memory in memories:
+    context += f"- {memory['memory']}\n"
+
+# Move this part outside the loop
+system_message = SystemMessage(content=f"""You are a helpful customer support assistant. Use the provided context to personalize your responses and remember user preferences and past interactions.
+{context}""")
+
+question = "do you know my name"
+
+messages.append({"role": "user", "content": question})
+
+client.add(messages, user_id="43bff7c7-c71b-4fae-bccf-405bcb6b263d")
+
+full_messages = [system_message] + messages
+
+
 # Define nodes: these do the work
 builder.add_node("assistant", Assistant(assistant))
 builder.add_node("tools", create_tool_node_with_fallback(tools))
@@ -131,7 +162,24 @@ builder.add_edge(START, "assistant")
 builder.add_conditional_edges("assistant", tools_condition)
 builder.add_edge("tools", "assistant")
 
-# The checkpointer lets the graph persist its state
-# this is a complete memory for the entire graph.
+
+
 memory = MemorySaver()
 agent = builder.compile(checkpointer=memory)
+
+response = agent.invoke(
+    {"messages": full_messages},  # Send all messages including the custom question
+    config={"configurable": {"thread_id": "43bff7c7-c71b-4fae-bccf-405bcb6b263d", "thread_name": "updated_chat_name"}}
+)
+
+final_response = ""
+
+# Iterate through the messages in the response
+for message in response['messages']:
+    # Check if the message is of type AIMessage
+    if isinstance(message, AIMessage):
+        # Extract the content of the last AIMessage
+        final_response = message.content  # This holds the main response text
+
+# Print the final extracted response
+print(f"Assistant's Response: {final_response}")
