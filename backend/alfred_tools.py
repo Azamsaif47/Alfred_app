@@ -34,7 +34,7 @@ rag_chain = create_retrieval_chain(vectorstore.as_retriever(), combine_docs_chai
 @tool
 def retriever_tool(query: str = None):
     """This tool contains all the necessary data about
-       Surface Tech's offering of Aramid Reinforced Composite Asphalt.
+       your company data that can be used to answer questions
        When a user asks a question about this topic, always use this tool to retrieve the
        information and answer their question. Be sure to include the source provided in the JSON format with your answer,
        as the source is essential for accuracy.
@@ -57,7 +57,7 @@ def list_contacts(search: str = None):
         dict: API response as JSON.
     """
     api_base_url = CONTACTS_URL
-    token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
+    token = "your-api-key-token"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json"
@@ -84,7 +84,7 @@ def create_contact(first_name: str, email: str, last_name: str = None, phone: st
         dict: API response as JSON.
     """
     api_base_url = CONTACTS_URL
-    token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
+    token = "your-api-key-token"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json"
@@ -114,7 +114,7 @@ def get_contact_details(contact_id: str):
         dict: API response as JSON.
     """
     api_base_url = CONTACTS_URL
-    token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
+    token = "your-api-key-token"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json"
@@ -140,7 +140,7 @@ def find_contact(first_name: str = None, last_name: str = None, email: str = Non
         dict: API response as JSON.
     """
     api_base_url = CONTACTS_URL
-    token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
+    token = "your-api-key-token"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json"
@@ -183,7 +183,7 @@ def send_email(subject: str, html: str, to: list, cc: list = None, bcc: list = N
         - "bcc": ["bcc@example.com"]
     """
     api_base_url = CONTACTS_URL
-    token = "2|uDd2aZH3gFZgNCsCqjosJYEPuZ9W8pORheTdwJVi05ccd703"
+    token = "your-api-key-token"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json"
