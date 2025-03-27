@@ -11,7 +11,7 @@ from langgraph.prebuilt import tools_condition
 from datetime import datetime
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
-from alfred_tools import list_contacts,create_contact, get_contact_details, find_contact, send_email, generate_chart, retriever_tool
+from chat_app.backend.chatbot_tools import list_contacts,create_contact, get_contact_details, find_contact, send_email, generate_chart, retriever_tool
 from dotenv import load_dotenv
 import os
 
@@ -76,7 +76,7 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are Alfred, a helpful assistant for a company (your comany name here)"
+            "You are chatbot, a helpful assistant for a company (your comany name here)"
             "Speak like an experienced representative of [Company name], using friendly and knowledgeable language. "
             "Your objectives are to answer user queries about the asphalt industry, case studies, tests, and the company, "
             "using the information in your retriever tool and other tools. Always refer to the provided context and knowledge base for answering user questions. "

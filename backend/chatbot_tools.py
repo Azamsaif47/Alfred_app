@@ -48,7 +48,7 @@ def retriever_tool(query: str = None):
 @tool
 def list_contacts(search: str = None):
     """
-    List contacts via the Alfred API using Bearer token authentication.
+    List contacts via the Chatbot Api using Bearer token authentication.
 
     Args:
         search (str): Optional search query to filter contacts.
@@ -72,7 +72,7 @@ def list_contacts(search: str = None):
 @tool
 def create_contact(first_name: str, email: str, last_name: str = None, phone: str = None):
     """
-    Create a contact via the Alfred API using Bearer token authentication.
+    Create a contact via the Chatbot Api using Bearer token authentication.
 
     Args:
         first_name (str): First name of the contact.
@@ -105,7 +105,7 @@ def create_contact(first_name: str, email: str, last_name: str = None, phone: st
 @tool
 def get_contact_details(contact_id: str):
     """
-    Get contact details by ID via the Alfred API using Bearer token authentication.
+    Get contact details by ID via the Chatbot Api using Bearer token authentication.
 
     Args:
         contact_id (str): The contact ID.
@@ -129,7 +129,7 @@ def get_contact_details(contact_id: str):
 @tool
 def find_contact(first_name: str = None, last_name: str = None, email: str = None):
     """
-    Find contact via the Alfred API using Bearer token authentication.
+    Find contact via the Chatbot Api using Bearer token authentication.
 
     Args:
         first_name (str, optional): First name of the contact.
@@ -163,7 +163,7 @@ def find_contact(first_name: str = None, last_name: str = None, email: str = Non
 @tool
 def send_email(subject: str, html: str, to: list, cc: list = None, bcc: list = None):
     """
-    Send an email via the Alfred API using Bearer token authentication.
+    Send an email via the Chatbot Api using Bearer token authentication.
 
     Args:
         subject (str): Subject of the email.
