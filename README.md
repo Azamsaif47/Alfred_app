@@ -1,8 +1,8 @@
-# Alfred: AI-Powered Assistance 
+# William: AI-Powered Assistance 
 
 ## 📋 Project Overview
 
-Alfred is an advanced AI-powered assistant designed specifically , focusing on providing comprehensive support for [Company] solutions. The application leverages cutting-edge technologies to deliver intelligent, context-aware responses and streamline user interactions.
+William is an advanced AI-powered assistant designed specifically , focusing on providing comprehensive support for [Company] solutions. The application leverages cutting-edge technologies to deliver intelligent, context-aware responses and streamline user interactions.
 
 ## 🚀 Technology Stack
 
@@ -44,8 +44,8 @@ Alfred is an advanced AI-powered assistant designed specifically , focusing on p
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/your-org/alfred.git
-cd alfred
+git clone https://github.com/your-org/William.git
+cd William
 ```
 
 ### Environment Configuration
@@ -53,7 +53,8 @@ cd alfred
 2. Add the following required environment variables:
    ```
    OPENAI_API_KEY=your_openai_api_key
-   DATABASE_URL=postgresql+asyncpg://postgres:admin@postgres_db:5432/alfred
+   DATABASE_URL=postgresql+asyncpg://postgres:admin@postgres_db:5432/William
+
    CONTACTS_URL=your_contacts_api_url
    CHART_URL=your_chart_generation_url
    ```
@@ -69,10 +70,10 @@ The application will be available at:
 
 ## 📂 Project Structure
 ```
-alfred/
+William/
 │
 ├── backend/
-│   ├── alfred_tools.py      # AI tools and utilities
+│   ├── William_tools.py      # AI tools and utilities
 │   ├── assistant.py         # AI assistant configuration
 │   ├── main.py              # FastAPI application
 │   ├── Dockerfile           # Backend Docker configuration
