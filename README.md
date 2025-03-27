@@ -1,8 +1,8 @@
-# Alfred: AI-Powered Assistance for Surface Tech
+# Alfred: AI-Powered Assistance 
 
 ## 📋 Project Overview
 
-Alfred is an advanced AI-powered assistant designed specifically for Surface Tech, focusing on providing comprehensive support for Aramid Reinforced Composite Asphalt solutions. The application leverages cutting-edge technologies to deliver intelligent, context-aware responses and streamline user interactions.
+Alfred is an advanced AI-powered assistant designed specifically , focusing on providing comprehensive support for [Company] solutions. The application leverages cutting-edge technologies to deliver intelligent, context-aware responses and streamline user interactions.
 
 ## 🚀 Technology Stack
 
@@ -110,8 +110,3 @@ alfred/
 4. Push to the branch
 5. Create a Pull Request
 
-## 📜 License
-[Specify your license, e.g., MIT]
-
-## 💡 Contact
-For support or inquiries, contact [Your Contact Information]
